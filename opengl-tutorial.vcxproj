@@ -70,12 +70,12 @@
     <LinkIncremental>true</LinkIncremental>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <IncludePath>$(ProjectDir)\glad\include;$(ProjectDir)\glfw-3.2.1.bin.WIN64\include;$(ProjectDir)\inc;$(IncludePath)</IncludePath>
+    <IncludePath>$(ProjectDir)\glm-0.9.8.5;$(ProjectDir)\glad\include;$(ProjectDir)\glfw-3.2.1.bin.WIN64\include;$(ProjectDir)\inc;$(IncludePath)</IncludePath>
     <LibraryPath>$(ProjectDir)\glfw-3.2.1.bin.WIN64\lib-vc2015;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <IncludePath>C:\Users\zhonglia\Documents\projects\opengl-tutorial\glad\include;C:\Users\zhonglia\Documents\projects\opengl-tutorial\glfw-3.2.1.bin.WIN64\include;C:\Users\zhonglia\Documents\projects\opengl-tutorial\inc;$(IncludePath)</IncludePath>
-    <LibraryPath>C:\Users\zhonglia\Documents\projects\opengl-tutorial\glfw-3.2.1.bin.WIN64\lib-vc2015;$(LibraryPath)</LibraryPath>
+    <IncludePath>$(ProjectDir)\glm-0.9.8.5;$(ProjectDir)\glad\include;$(ProjectDir)\glfw-3.2.1.bin.WIN64\include;$(ProjectDir)\inc;$(IncludePath)</IncludePath>
+    <LibraryPath>$(ProjectDir)\glfw-3.2.1.bin.WIN64\lib-vc2015;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -120,6 +120,7 @@
     <ClCompile Include="glad\src\glad.c" />
     <ClCompile Include="src\FileReader.cpp" />
     <ClCompile Include="src\HelloTexture.cpp" />
+    <ClCompile Include="src\HelloTransformations.cpp" />
     <ClCompile Include="src\HelloTriangle.cpp" />
     <ClCompile Include="src\HelloWindow.cpp" />
     <ClCompile Include="src\Logger.cpp" />
@@ -133,6 +134,7 @@
     <ClInclude Include="glfw-3.2.1.bin.win64\include\glfw\glfw3native.h" />
     <ClInclude Include="inc\FileReader.h" />
     <ClInclude Include="inc\HelloTexture.h" />
+    <ClInclude Include="inc\HelloTransformations.h" />
     <ClInclude Include="inc\HelloTriangle.h" />
     <ClInclude Include="inc\HelloWindow.h" />
     <ClInclude Include="inc\Logger.h" />
@@ -141,6 +143,8 @@
   <ItemGroup>
     <None Include="src\HelloTextureFragment.glsl" />
     <None Include="src\HelloTextureVertex.glsl" />
+    <None Include="src\HelloTransformationsFragment.glsl" />
+    <None Include="src\HelloTransformationsVertex.glsl" />
     <None Include="src\HelloTriangleFragment.glsl" />
     <None Include="src\HelloTriangleVertex.glsl" />
   </ItemGroup>
