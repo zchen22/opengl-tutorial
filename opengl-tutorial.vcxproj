@@ -70,8 +70,8 @@
     <LinkIncremental>true</LinkIncremental>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <IncludePath>C:\Users\zhonglia\Documents\projects\opengl-tutorial\glad\include;C:\Users\zhonglia\Documents\projects\opengl-tutorial\glfw-3.2.1.bin.WIN64\include;C:\Users\zhonglia\Documents\projects\opengl-tutorial\inc;$(IncludePath)</IncludePath>
-    <LibraryPath>C:\Users\zhonglia\Documents\projects\opengl-tutorial\glfw-3.2.1.bin.WIN64\lib-vc2015;$(LibraryPath)</LibraryPath>
+    <IncludePath>$(ProjectDir)\glad\include;$(ProjectDir)\glfw-3.2.1.bin.WIN64\include;$(ProjectDir)\inc;$(IncludePath)</IncludePath>
+    <LibraryPath>$(ProjectDir)\glfw-3.2.1.bin.WIN64\lib-vc2015;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <IncludePath>C:\Users\zhonglia\Documents\projects\opengl-tutorial\glad\include;C:\Users\zhonglia\Documents\projects\opengl-tutorial\glfw-3.2.1.bin.WIN64\include;C:\Users\zhonglia\Documents\projects\opengl-tutorial\inc;$(IncludePath)</IncludePath>
