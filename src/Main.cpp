@@ -2,6 +2,7 @@
 #include "HelloTriangle.h"
 #include "HelloTexture.h"
 #include "HelloTransformations.h"
+#include "HelloCoordSystems.h"
 
 int main() {
 	HelloWindow win;
@@ -12,5 +13,7 @@ int main() {
 	tex.Main();
 	HelloTransformations trans;
 	trans.Main();
+	HelloCoordSystems coords(800, 600);
+	coords.Main();
 	return 0;
 }

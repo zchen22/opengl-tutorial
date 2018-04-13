@@ -119,6 +119,7 @@
   <ItemGroup>
     <ClCompile Include="glad\src\glad.c" />
     <ClCompile Include="src\FileReader.cpp" />
+    <ClCompile Include="src\HelloCoordSystems.cpp" />
     <ClCompile Include="src\HelloTexture.cpp" />
     <ClCompile Include="src\HelloTransformations.cpp" />
     <ClCompile Include="src\HelloTriangle.cpp" />
@@ -133,6 +134,7 @@
     <ClInclude Include="glfw-3.2.1.bin.win64\include\glfw\glfw3.h" />
     <ClInclude Include="glfw-3.2.1.bin.win64\include\glfw\glfw3native.h" />
     <ClInclude Include="inc\FileReader.h" />
+    <ClInclude Include="inc\HelloCoordSystems.h" />
     <ClInclude Include="inc\HelloTexture.h" />
     <ClInclude Include="inc\HelloTransformations.h" />
     <ClInclude Include="inc\HelloTriangle.h" />
@@ -141,6 +143,8 @@
     <ClInclude Include="inc\stb_image.h" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="src\HelloCoordSystemsFragment.glsl" />
+    <None Include="src\HelloCoordSystemsVertex.glsl" />
     <None Include="src\HelloTextureFragment.glsl" />
     <None Include="src\HelloTextureVertex.glsl" />
     <None Include="src\HelloTransformationsFragment.glsl" />
