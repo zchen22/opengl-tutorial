@@ -45,6 +45,9 @@
     <ClCompile Include="src\HelloCoordSystems.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\HelloCamera.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="glad\include\glad\glad.h">
@@ -83,6 +86,9 @@
     <ClInclude Include="inc\HelloCoordSystems.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="inc\HelloCamera.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="src\HelloTextureFragment.glsl">
@@ -107,6 +113,12 @@
       <Filter>Source Files</Filter>
     </None>
     <None Include="src\HelloCoordSystemsVertex.glsl">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="src\HelloCameraFragment.glsl">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="src\HelloCameraVertex.glsl">
       <Filter>Source Files</Filter>
     </None>
   </ItemGroup>
