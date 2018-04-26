@@ -2,12 +2,18 @@
 
 #include <iostream>
 
-#include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
 #include "FileReader.h"
 #include "stb_image.h"
+
+bool HelloCamera::firstFrame_ = true;
+float HelloCamera::lastCursorX_ = 0;
+float HelloCamera::lastCursorY_ = 0;
+float HelloCamera::yaw_ = -90;
+float HelloCamera::pitch_ = 0;
+float HelloCamera::fov_ = 45;
 
 HelloCamera::HelloCamera()
 	: windowWidth_(0),
@@ -18,7 +24,11 @@ HelloCamera::HelloCamera()
 	fragmentShader_(0),
 	shaderProgram_(0),
 	vao_(0),
-	vbo_(0) {
+	vbo_(0),
+	tex1_(0),
+	tex2_(0),
+	deltaFrameTime_(0.0f),
+	lastFrameTime_(0.0f) {
 }
 
 HelloCamera::HelloCamera(const int width, const int height)
@@ -30,7 +40,16 @@ HelloCamera::HelloCamera(const int width, const int height)
 	fragmentShader_(0),
 	shaderProgram_(0),
 	vao_(0),
-	vbo_(0) {
+	vbo_(0),
+	tex1_(0),
+	tex2_(0),
+	camPos_(glm::vec3(0.0f, 0.0f, 3.0f)),
+	camFront_(glm::vec3(0.0f, 0.0f, -1.0f)),
+	camUp_(glm::vec3(0.0f, 1.0f, 0.0f)),
+	deltaFrameTime_(0.0f),
+	lastFrameTime_(0.0f) {
+	lastCursorX_ = width / 2;
+	lastCursorY_ = height / 2;
 }
 
 HelloCamera::~HelloCamera() {
@@ -48,6 +67,7 @@ int HelloCamera::Main() {
 	CreateModelMatrix_();
 	// Render loop
 	while (!glfwWindowShouldClose(window_)) {
+		GetFrameTime_();
 		ProcessInput_(window_);
 		CreateModelMatrix_();
 		CreateViewMatrix_();
@@ -83,6 +103,10 @@ int HelloCamera::Init_() {
 	}
 	// Enable depth testing
 	glEnable(GL_DEPTH_TEST);
+	// Register mouse callback functions
+	glfwSetInputMode(window_, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+	glfwSetCursorPosCallback(window_, MouseCallback_);
+	glfwSetScrollCallback(window_, ScrollCallback_);
 	return 0;
 }
 
@@ -257,18 +281,39 @@ int HelloCamera::BindSamplerToTexUnit_() {
 	return 0;
 }
 
+// Get time
+int HelloCamera::GetFrameTime_() {
+	float currentFrameTime = glfwGetTime();
+	deltaFrameTime_ = currentFrameTime - lastFrameTime_;
+	lastFrameTime_ = currentFrameTime;
+	return 0;
+}
+
 // Process all input
 int HelloCamera::ProcessInput_(GLFWwindow *window) {
 	if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS) {
 		glfwSetWindowShouldClose(window, true);
 	}
+	const float cameraSpeed = 1.0f * deltaFrameTime_;
+	if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) {
+		camPos_ += cameraSpeed * camFront_;
+	}
+	if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) {
+		camPos_ -= cameraSpeed * camFront_;
+	}
+	if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) {
+		camPos_ -= glm::normalize(glm::cross(camFront_, camUp_)) * cameraSpeed;
+	}
+	if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) {
+		camPos_ += glm::normalize(glm::cross(camFront_, camUp_)) * cameraSpeed;
+	}
+	
 	return 0;
 }
 
 // Create the model matrix
 int HelloCamera::CreateModelMatrix_() {
-	glm::mat4 model;
-	model = glm::rotate(model, (float)glfwGetTime() * glm::radians(45.0f), glm::vec3(1.0f, 1.0f, 0.0f));
+	glm::mat4 model(1.0f);
 	const int modelLoc = glGetUniformLocation(shaderProgram_, "model");
 	glUseProgram(shaderProgram_);
 	glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
@@ -277,8 +322,11 @@ int HelloCamera::CreateModelMatrix_() {
 
 // Create the view matrix
 int HelloCamera::CreateViewMatrix_() {
-	glm::mat4 view;
-	view = glm::translate(view, glm::vec3(0.0f, 0.0f, -3.0f));
+	camFront_.x = cos(glm::radians(pitch_)) * cos(glm::radians(yaw_));
+	camFront_.y = sin(glm::radians(pitch_));
+	camFront_.z = cos(glm::radians(pitch_)) * sin(glm::radians(yaw_));
+	camFront_ = glm::normalize(camFront_);
+	glm::mat4 view = glm::lookAt(camPos_, camPos_ + camFront_, camUp_);
 	const int viewLoc = glGetUniformLocation(shaderProgram_, "view");
 	glUseProgram(shaderProgram_);
 	glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
@@ -288,7 +336,7 @@ int HelloCamera::CreateViewMatrix_() {
 // Create the projection matrix
 int HelloCamera::CreateProjectionMatrix_() {
 	glm::mat4 projection;
-	projection = glm::perspective(glm::radians(45.0f), 1.0f * windowWidth_ / windowHeight_, 0.1f, 100.0f);
+	projection = glm::perspective(glm::radians(fov_), 1.0f * windowWidth_ / windowHeight_, 0.1f, 100.0f);
 	const int projectionLoc = glGetUniformLocation(shaderProgram_, "projection");
 	glUseProgram(shaderProgram_);
 	glUniformMatrix4fv(projectionLoc, 1, GL_FALSE, glm::value_ptr(projection));
@@ -325,4 +373,37 @@ int HelloCamera::CleanUp_() {
 void HelloCamera::FramebufferSizeCallback_(GLFWwindow* window, int width, int height) {
 	// make sure the viewport matches the new window dimensions
 	glViewport(0, 0, width, height);
+}
+
+// Whenever the mouse moves, this callback function executes
+void HelloCamera::MouseCallback_(GLFWwindow* window, double xPos, double yPos) {
+	if (firstFrame_) {
+		lastCursorX_ = xPos;
+		lastCursorY_ = yPos;
+		firstFrame_ = false;
+	}
+	const float sensitivity = 0.05f;
+	float xOffset = (xPos - lastCursorX_) * sensitivity;
+	float yOffset = (lastCursorY_ - yPos) * sensitivity;
+	lastCursorX_ = xPos;
+	lastCursorY_ = yPos;
+	yaw_ += xOffset;
+	pitch_ += yOffset;
+	if (pitch_ > 89.0f) {
+		pitch_ = 89.0f;
+	}
+	if (pitch_ < -89.0f) {
+		pitch_ = -89.0f;
+	}
+}
+
+// Whenever the mouse scrolls, this callback function executes
+void HelloCamera::ScrollCallback_(GLFWwindow* window, double xOffset, double yOffset) {
+	if (fov_ < 1.0f) {
+		fov_ = 1.0f;
+	} else if (fov_ > 45.0f) {
+		fov_ = 45.0f;
+	} else {
+		fov_ -= yOffset;
+	}
 }
