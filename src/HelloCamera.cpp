@@ -37,7 +37,6 @@ int HelloCamera::Main() {
 	CreateTexture1_();
 	CreateTexture2_();
 	BindSamplerToTexUnit_();
-	CreateModelMatrix_();
 	// Render loop
 	while (!glfwWindowShouldClose(window_)) {
 		GetFrameTime_();
