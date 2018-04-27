@@ -17,7 +17,7 @@ int PrintMenu(const std::unordered_map<int, std::string>& samples) {
 }
 
 int main() {
-	std::unordered_map<int, std::string> samples({{0, "Exit"},  {1, "HelloWindow"}, {2, "HelloWindow"}, {3, "HelloTexture"}, {4, "HelloTransformations"}, {5, "HelloCoordSystems",}, {6, "HelloCamera"} });
+	std::unordered_map<int, std::string> samples({{0, "Exit"},  {1, "HelloWindow"}, {2, "HelloTriangle"}, {3, "HelloTexture"}, {4, "HelloTransformations"}, {5, "HelloCoordSystems",}, {6, "HelloCamera"} });
 	int sampleId = 0;
 	do {
 		PrintMenu(samples);

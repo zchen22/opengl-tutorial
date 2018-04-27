@@ -1,24 +1,24 @@
 #pragma once
 
+#include <memory>
+
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
-
 #include <glm/glm.hpp>
 
+#include "Camera.h"
 #include "Logger.h"
+#include "Shader.h"
 
 class HelloCamera {
 public:
-	HelloCamera();
 	HelloCamera(const int width, const int height);
 	~HelloCamera();
 	int Main();
 private:
 	// Internal functions
 	int Init_();
-	int CreateVertexShader_();
-	int CreateFragmentShader_();
-	int LinkShaders_();
+	int SetUpShader_();
 	int SetUpVertexData_();
 	int CreateTexture1_();
 	int CreateTexture2_();
@@ -30,7 +30,7 @@ private:
 	int CreateProjectionMatrix_();
 	int Render_();
 	int CleanUp_();
-	// The following functions must be static to be used as a function pointer in GLFW APIs
+	// The following functions must be static to be used as a function pointer in GLFW C APIs
 	static void FramebufferSizeCallback_(GLFWwindow* window, int width, int height);
 	static void MouseCallback_(GLFWwindow* window, double xpos, double ypos);
 	static void ScrollCallback_(GLFWwindow* window, double xoffset, double yoffset);
@@ -39,18 +39,12 @@ private:
 	const int windowWidth_;
 	const int windowHeight_;
 	GLFWwindow* window_;
-	char* vertexShaderSource_;
-	char* fragmentShaderSource_;
-	int vertexShader_;
-	int fragmentShader_;
-	int shaderProgram_;
+	std::unique_ptr<Shader> shader_;
 	unsigned int vao_;
 	unsigned int vbo_;
 	unsigned int tex1_;
 	unsigned int tex2_;
-	glm::vec3 camPos_;
-	glm::vec3 camFront_;
-	glm::vec3 camUp_;
+	std::unique_ptr<Camera> camera_;
 	float deltaFrameTime_;
 	float lastFrameTime_;
 	static bool firstFrame_;

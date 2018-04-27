@@ -1,7 +1,5 @@
 #include "HelloCoordSystems.h"
 
-#include <iostream>
-
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
@@ -12,11 +10,7 @@
 HelloCoordSystems::HelloCoordSystems()
 	: windowWidth_(0),
 	windowHeight_(0),
-	vertexShaderSource_(nullptr),
-	fragmentShaderSource_(nullptr),
-	vertexShader_(0),
-	fragmentShader_(0),
-	shaderProgram_(0),
+	shader_(nullptr),
 	vao_(0),
 	vbo_(0) {
 }
@@ -24,11 +18,7 @@ HelloCoordSystems::HelloCoordSystems()
 HelloCoordSystems::HelloCoordSystems(const int width, const int height)
 	: windowWidth_(width),
 	windowHeight_(height),
-	vertexShaderSource_(nullptr),
-	fragmentShaderSource_(nullptr),
-	vertexShader_(0),
-	fragmentShader_(0),
-	shaderProgram_(0),
+	shader_(nullptr),
 	vao_(0),
 	vbo_(0) {
 }
@@ -38,9 +28,7 @@ HelloCoordSystems::~HelloCoordSystems() {
 
 int HelloCoordSystems::Main() {
 	Init_();
-	CreateVertexShader_();
-	CreateFragmentShader_();
-	LinkShaders_();
+	SetUpShader_();
 	SetUpVertexData_();
 	CreateTexture1_();
 	CreateTexture2_();
@@ -83,62 +71,17 @@ int HelloCoordSystems::Init_() {
 	}
 	// Enable depth testing
 	glEnable(GL_DEPTH_TEST);
+	// Create an empty shader program
+	shader_ = std::make_unique<Shader>(Shader(logger_));
 	return 0;
 }
 
-// Create a vertex shader
-int HelloCoordSystems::CreateVertexShader_() {
-	FileReader f("src/HelloCoordSystemsVertex.glsl");
-	vertexShaderSource_ = new char[f.GetSize() + 1]();
-	f.ReadAsString(vertexShaderSource_);
-	vertexShader_ = glCreateShader(GL_VERTEX_SHADER);
-	glShaderSource(vertexShader_, 1, &vertexShaderSource_, NULL);
-	glCompileShader(vertexShader_);
-	int success = 0;
-	char infoLog[512] = "";
-	glGetShaderiv(vertexShader_, GL_COMPILE_STATUS, &success);
-	if (!success) {
-		glGetShaderInfoLog(vertexShader_, 512, NULL, infoLog);
-		logger_.Error("Failed to build the vertex shader\n%s\n", infoLog);
-	}
-	return 0;
-}
-
-// Create a fragment shader
-int HelloCoordSystems::CreateFragmentShader_() {
-	FileReader f("src/HelloCoordSystemsFragment.glsl");
-	fragmentShaderSource_ = new char[f.GetSize() + 1]();
-	f.ReadAsString(fragmentShaderSource_);
-	fragmentShader_ = glCreateShader(GL_FRAGMENT_SHADER);
-	glShaderSource(fragmentShader_, 1, &fragmentShaderSource_, NULL);
-	glCompileShader(fragmentShader_);
-	int success = 0;
-	char infoLog[512] = "";
-	glGetShaderiv(fragmentShader_, GL_COMPILE_STATUS, &success);
-	if (!success) {
-		glGetShaderInfoLog(fragmentShader_, 512, NULL, infoLog);
-		logger_.Error("Failed to build the fragment shader\n%s\n", infoLog);
-	}
-	return 0;
-}
-
-// Link shaders
-int HelloCoordSystems::LinkShaders_() {
-	shaderProgram_ = glCreateProgram();
-	glAttachShader(shaderProgram_, vertexShader_);
-	glAttachShader(shaderProgram_, fragmentShader_);
-	glLinkProgram(shaderProgram_);
-	int success = 0;
-	char infoLog[512] = "";
-	glGetProgramiv(shaderProgram_, GL_LINK_STATUS, &success);
-	if (!success) {
-		glGetProgramInfoLog(shaderProgram_, 512, NULL, infoLog);
-		logger_.Error("Failed to link shaders\n");
-	}
-	delete[] vertexShaderSource_;
-	delete[] fragmentShaderSource_;
-	glDeleteShader(vertexShader_);
-	glDeleteShader(fragmentShader_);
+// Set up the shader program
+int HelloCoordSystems::SetUpShader_() {
+	assert(shader_ != nullptr);
+	shader_->AddVertex("src/HelloCoordSystemsVertex.glsl");
+	shader_->AddFragment("src/HelloCoordSystemsFragment.glsl");
+	shader_->Link();
 	return 0;
 }
 
@@ -251,9 +194,9 @@ int HelloCoordSystems::CreateTexture2_() {
 
 // Bind samplers to texture units
 int HelloCoordSystems::BindSamplerToTexUnit_() {
-	glUseProgram(shaderProgram_);
-	glUniform1i(glGetUniformLocation(shaderProgram_, "sampler1"), 0);
-	glUniform1i(glGetUniformLocation(shaderProgram_, "sampler2"), 1);
+	glUseProgram(shader_->program);
+	glUniform1i(glGetUniformLocation(shader_->program, "sampler1"), 0);
+	glUniform1i(glGetUniformLocation(shader_->program, "sampler2"), 1);
 	return 0;
 }
 
@@ -269,8 +212,8 @@ int HelloCoordSystems::ProcessInput_(GLFWwindow *window) {
 int HelloCoordSystems::CreateModelMatrix_() {
 	glm::mat4 model;
 	model = glm::rotate(model, (float)glfwGetTime() * glm::radians(45.0f), glm::vec3(1.0f, 1.0f, 0.0f));
-	const int modelLoc = glGetUniformLocation(shaderProgram_, "model");
-	glUseProgram(shaderProgram_);
+	const int modelLoc = glGetUniformLocation(shader_->program, "model");
+	glUseProgram(shader_->program);
 	glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
 	return 0;
 }
@@ -279,8 +222,8 @@ int HelloCoordSystems::CreateModelMatrix_() {
 int HelloCoordSystems::CreateViewMatrix_() {
 	glm::mat4 view;
 	view = glm::translate(view, glm::vec3(0.0f, 0.0f, -3.0f));
-	const int viewLoc = glGetUniformLocation(shaderProgram_, "view");
-	glUseProgram(shaderProgram_);
+	const int viewLoc = glGetUniformLocation(shader_->program, "view");
+	glUseProgram(shader_->program);
 	glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
 	return 0;
 }
@@ -289,8 +232,8 @@ int HelloCoordSystems::CreateViewMatrix_() {
 int HelloCoordSystems::CreateProjectionMatrix_() {
 	glm::mat4 projection;
 	projection = glm::perspective(glm::radians(45.0f), 1.0f * windowWidth_ / windowHeight_, 0.1f, 100.0f);
-	const int projectionLoc = glGetUniformLocation(shaderProgram_, "projection");
-	glUseProgram(shaderProgram_);
+	const int projectionLoc = glGetUniformLocation(shader_->program, "projection");
+	glUseProgram(shader_->program);
 	glUniformMatrix4fv(projectionLoc, 1, GL_FALSE, glm::value_ptr(projection));
 	return 0;
 }
@@ -306,7 +249,7 @@ int HelloCoordSystems::Render_() {
 	glActiveTexture(GL_TEXTURE1);
 	glBindTexture(GL_TEXTURE_2D, tex2_);
 	// Draw
-	glUseProgram(shaderProgram_);
+	glUseProgram(shader_->program);
 	glBindVertexArray(vao_);  // No need to bind it every time 
 	glDrawArrays(GL_TRIANGLES, 0, 36);
 	glBindVertexArray(0);  // No need to unbind it every time 

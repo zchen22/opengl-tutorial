@@ -1,13 +1,13 @@
 #pragma once
 
+#include <string>
+
 class FileReader {
 public:
-	FileReader();
-	FileReader(const char* fileName);
+	FileReader(const std::string& fileName);
 	~FileReader();
-	long int GetSize();
-	int ReadAsString(char* str);
+	int GetSize(long int& size);
+	int ReadAsString(std::string& str);
 private:
-	const char* fileName_;
-	long int size_;
+	const std::string fileName_;
 };

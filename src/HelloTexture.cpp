@@ -1,16 +1,12 @@
 #include "HelloTexture.h"
 
-#include <iostream>
+#include <cassert>
 
 #include "FileReader.h"
 #include "stb_image.h"
 
 HelloTexture::HelloTexture()
-	: vertexShaderSource_(nullptr),
-	fragmentShaderSource_(nullptr),
-	vertexShader_(0),
-	fragmentShader_(0),
-	shaderProgram_(0),
+	: shader_(nullptr),
 	vao_(0),
 	vbo_(0),
 	ebo_(0) {
@@ -21,9 +17,7 @@ HelloTexture::~HelloTexture() {
 
 int HelloTexture::Main() {
 	Init_();
-	CreateVertexShader_();
-	CreateFragmentShader_();
-	LinkShaders_();
+	SetUpShader_();
 	SetUpVertexData_();
 	CreateTexture1_();
 	CreateTexture2_();
@@ -60,62 +54,17 @@ int HelloTexture::Init_() {
 		logger_.Error("Failed to initialize GLAD\n");
 		exit(EXIT_FAILURE);
 	}
+	// Create an empty shader program
+	shader_ = std::make_unique<Shader>(Shader(logger_));
 	return 0;
 }
 
-// Create a vertex shader
-int HelloTexture::CreateVertexShader_() {
-	FileReader f("src/HelloTextureVertex.glsl");
-	vertexShaderSource_ = new char[f.GetSize() + 1]();
-	f.ReadAsString(vertexShaderSource_);
-	vertexShader_ = glCreateShader(GL_VERTEX_SHADER);
-	glShaderSource(vertexShader_, 1, &vertexShaderSource_, NULL);
-	glCompileShader(vertexShader_);
-	int success = 0;
-	char infoLog[512] = "";
-	glGetShaderiv(vertexShader_, GL_COMPILE_STATUS, &success);
-	if (!success) {
-		glGetShaderInfoLog(vertexShader_, 512, NULL, infoLog);
-		logger_.Error("Failed to build the vertex shader\n%s\n", infoLog);
-	}
-	return 0;
-}
-
-// Create a fragment shader
-int HelloTexture::CreateFragmentShader_() {
-	FileReader f("src/HelloTextureFragment.glsl");
-	fragmentShaderSource_ = new char[f.GetSize() + 1]();
-	f.ReadAsString(fragmentShaderSource_);
-	fragmentShader_ = glCreateShader(GL_FRAGMENT_SHADER);
-	glShaderSource(fragmentShader_, 1, &fragmentShaderSource_, NULL);
-	glCompileShader(fragmentShader_);
-	int success = 0;
-	char infoLog[512] = "";
-	glGetShaderiv(fragmentShader_, GL_COMPILE_STATUS, &success);
-	if (!success) {
-		glGetShaderInfoLog(fragmentShader_, 512, NULL, infoLog);
-		logger_.Error("Failed to build the fragment shader\n%s\n", infoLog);
-	}
-	return 0;
-}
-
-// Link shaders
-int HelloTexture::LinkShaders_() {
-	shaderProgram_ = glCreateProgram();
-	glAttachShader(shaderProgram_, vertexShader_);
-	glAttachShader(shaderProgram_, fragmentShader_);
-	glLinkProgram(shaderProgram_);
-	int success = 0;
-	char infoLog[512] = "";
-	glGetProgramiv(shaderProgram_, GL_LINK_STATUS, &success);
-	if (!success) {
-		glGetProgramInfoLog(shaderProgram_, 512, NULL, infoLog);
-		logger_.Error("Failed to link shaders\n");
-	}
-	delete[] vertexShaderSource_;
-	delete[] fragmentShaderSource_;
-	glDeleteShader(vertexShader_);
-	glDeleteShader(fragmentShader_);
+// Set up the shader program
+int HelloTexture::SetUpShader_() {
+	assert(shader_ != nullptr);
+	shader_->AddVertex("src/HelloTextureVertex.glsl");
+	shader_->AddFragment("src/HelloTextureFragment.glsl");
+	shader_->Link();
 	return 0;
 }
 
@@ -199,9 +148,9 @@ int HelloTexture::CreateTexture2_() {
 
 // Bind samplers to texture units
 int HelloTexture::BindSamplerToTexUnit_() {
-	glUseProgram(shaderProgram_);
-	glUniform1i(glGetUniformLocation(shaderProgram_, "sampler1"), 0);
-	glUniform1i(glGetUniformLocation(shaderProgram_, "sampler2"), 1);
+	glUseProgram(shader_->program);
+	glUniform1i(glGetUniformLocation(shader_->program, "sampler1"), 0);
+	glUniform1i(glGetUniformLocation(shader_->program, "sampler2"), 1);
 	return 0;
 }
 
@@ -224,7 +173,7 @@ int HelloTexture::Render_() {
 	glActiveTexture(GL_TEXTURE1);
 	glBindTexture(GL_TEXTURE_2D, tex2_);
 	// Draw
-	glUseProgram(shaderProgram_);
+	glUseProgram(shader_->program);
 	glBindVertexArray(vao_);  // No need to bind it every time 
 	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 	glBindVertexArray(0);  // No need to unbind it every time 

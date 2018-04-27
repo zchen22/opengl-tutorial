@@ -1,15 +1,11 @@
 #include "HelloTriangle.h"
 
-#include <iostream>
+#include <cassert>
 
 #include "FileReader.h"
 
 HelloTriangle::HelloTriangle()
-	: vertexShaderSource_(nullptr),
-	fragmentShaderSource_(nullptr),
-	vertexShader_(0),
-	fragmentShader_(0),
-	shaderProgram_(0),
+	: shader_(nullptr),
 	vao_(0),
 	vbo_(0),
 	ebo_(0) {
@@ -20,9 +16,7 @@ HelloTriangle::~HelloTriangle() {
 
 int HelloTriangle::Main() {
 	Init_();
-	CreateVertexShader_();
-	CreateFragmentShader_();
-	LinkShaders_();
+	SetUpShader_();
 	SetUpVertexData_();
 	// Render loop
 	while (!glfwWindowShouldClose(window_)) {
@@ -56,62 +50,17 @@ int HelloTriangle::Init_() {
 		logger_.Error("Failed to initialize GLAD\n");
 		exit(EXIT_FAILURE);
 	}
+	// Create an empty shader program
+	shader_ = std::make_unique<Shader>(Shader(logger_));
 	return 0;
 }
 
-// Create a vertex shader
-int HelloTriangle::CreateVertexShader_() {
-	FileReader f("src/HelloTriangleVertex.glsl");
-	vertexShaderSource_ = new char[f.GetSize() + 1]();
-	f.ReadAsString(vertexShaderSource_);
-	vertexShader_ = glCreateShader(GL_VERTEX_SHADER);
-	glShaderSource(vertexShader_, 1, &vertexShaderSource_, NULL);
-	glCompileShader(vertexShader_);
-	int success = 0;
-	char infoLog[512] = "";
-	glGetShaderiv(vertexShader_, GL_COMPILE_STATUS, &success);
-	if (!success) {
-		glGetShaderInfoLog(vertexShader_, 512, NULL, infoLog);
-		logger_.Error("Failed to build the vertex shader\n");
-	}
-	return 0;
-}
-
-// Create a fragment shader
-int HelloTriangle::CreateFragmentShader_() {
-	FileReader f("src/HelloTriangleFragment.glsl");
-	fragmentShaderSource_ = new char[f.GetSize() + 1]();
-	f.ReadAsString(fragmentShaderSource_);
-	fragmentShader_ = glCreateShader(GL_FRAGMENT_SHADER);
-	glShaderSource(fragmentShader_, 1, &fragmentShaderSource_, NULL);
-	glCompileShader(fragmentShader_);
-	int success = 0;
-	char infoLog[512] = "";
-	glGetShaderiv(fragmentShader_, GL_COMPILE_STATUS, &success);
-	if (!success) {
-		glGetShaderInfoLog(fragmentShader_, 512, NULL, infoLog);
-		logger_.Error("Failed to build the fragment shader\n");
-	}
-	return 0;
-}
-
-// Link shaders
-int HelloTriangle::LinkShaders_() {
-	shaderProgram_ = glCreateProgram();
-	glAttachShader(shaderProgram_, vertexShader_);
-	glAttachShader(shaderProgram_, fragmentShader_);
-	glLinkProgram(shaderProgram_);
-	int success = 0;
-	char infoLog[512] = "";
-	glGetProgramiv(shaderProgram_, GL_LINK_STATUS, &success);
-	if (!success) {
-		glGetProgramInfoLog(shaderProgram_, 512, NULL, infoLog);
-		logger_.Error("Failed to link shaders\n");
-	}
-	delete [] vertexShaderSource_;
-	delete [] fragmentShaderSource_;
-	glDeleteShader(vertexShader_);
-	glDeleteShader(fragmentShader_);
+// Set up the shader program
+int HelloTriangle::SetUpShader_() {
+	assert(shader_ != nullptr);
+	shader_->AddVertex("src/HelloTriangleVertex.glsl");
+	shader_->AddFragment("src/HelloTriangleFragment.glsl");
+	shader_->Link();
 	return 0;
 }
 
@@ -159,7 +108,7 @@ int HelloTriangle::ProcessInput_(GLFWwindow *window) {
 int HelloTriangle::Render_() {
 	glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT);
-	glUseProgram(shaderProgram_);
+	glUseProgram(shader_->program);
 	glBindVertexArray(vao_);  // No need to bind it every time 
 	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 	//glBindVertexArray(0);  // No need to unbind it every time 

@@ -1,7 +1,5 @@
 #include "HelloCamera.h"
 
-#include <iostream>
-
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
@@ -15,37 +13,14 @@ float HelloCamera::yaw_ = -90;
 float HelloCamera::pitch_ = 0;
 float HelloCamera::fov_ = 45;
 
-HelloCamera::HelloCamera()
-	: windowWidth_(0),
-	windowHeight_(0),
-	vertexShaderSource_(nullptr),
-	fragmentShaderSource_(nullptr),
-	vertexShader_(0),
-	fragmentShader_(0),
-	shaderProgram_(0),
-	vao_(0),
-	vbo_(0),
-	tex1_(0),
-	tex2_(0),
-	deltaFrameTime_(0.0f),
-	lastFrameTime_(0.0f) {
-}
-
-HelloCamera::HelloCamera(const int width, const int height)
+HelloCamera::HelloCamera(const int width = 800, const int height = 600)
 	: windowWidth_(width),
 	windowHeight_(height),
-	vertexShaderSource_(nullptr),
-	fragmentShaderSource_(nullptr),
-	vertexShader_(0),
-	fragmentShader_(0),
-	shaderProgram_(0),
+	shader_(nullptr),
 	vao_(0),
 	vbo_(0),
 	tex1_(0),
 	tex2_(0),
-	camPos_(glm::vec3(0.0f, 0.0f, 3.0f)),
-	camFront_(glm::vec3(0.0f, 0.0f, -1.0f)),
-	camUp_(glm::vec3(0.0f, 1.0f, 0.0f)),
 	deltaFrameTime_(0.0f),
 	lastFrameTime_(0.0f) {
 	lastCursorX_ = width / 2;
@@ -57,9 +32,7 @@ HelloCamera::~HelloCamera() {
 
 int HelloCamera::Main() {
 	Init_();
-	CreateVertexShader_();
-	CreateFragmentShader_();
-	LinkShaders_();
+	SetUpShader_();
 	SetUpVertexData_();
 	CreateTexture1_();
 	CreateTexture2_();
@@ -107,62 +80,19 @@ int HelloCamera::Init_() {
 	glfwSetInputMode(window_, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 	glfwSetCursorPosCallback(window_, MouseCallback_);
 	glfwSetScrollCallback(window_, ScrollCallback_);
+	// Create an empty shader program
+	shader_ = std::make_unique<Shader>(Shader(logger_));
+	// Create a camera
+	camera_ = std::make_unique<Camera>(Camera(logger_));
 	return 0;
 }
 
-// Create a vertex shader
-int HelloCamera::CreateVertexShader_() {
-	FileReader f("src/HelloCameraVertex.glsl");
-	vertexShaderSource_ = new char[f.GetSize() + 1]();
-	f.ReadAsString(vertexShaderSource_);
-	vertexShader_ = glCreateShader(GL_VERTEX_SHADER);
-	glShaderSource(vertexShader_, 1, &vertexShaderSource_, NULL);
-	glCompileShader(vertexShader_);
-	int success = 0;
-	char infoLog[512] = "";
-	glGetShaderiv(vertexShader_, GL_COMPILE_STATUS, &success);
-	if (!success) {
-		glGetShaderInfoLog(vertexShader_, 512, NULL, infoLog);
-		logger_.Error("Failed to build the vertex shader\n%s\n", infoLog);
-	}
-	return 0;
-}
-
-// Create a fragment shader
-int HelloCamera::CreateFragmentShader_() {
-	FileReader f("src/HelloCameraFragment.glsl");
-	fragmentShaderSource_ = new char[f.GetSize() + 1]();
-	f.ReadAsString(fragmentShaderSource_);
-	fragmentShader_ = glCreateShader(GL_FRAGMENT_SHADER);
-	glShaderSource(fragmentShader_, 1, &fragmentShaderSource_, NULL);
-	glCompileShader(fragmentShader_);
-	int success = 0;
-	char infoLog[512] = "";
-	glGetShaderiv(fragmentShader_, GL_COMPILE_STATUS, &success);
-	if (!success) {
-		glGetShaderInfoLog(fragmentShader_, 512, NULL, infoLog);
-		logger_.Error("Failed to build the fragment shader\n%s\n", infoLog);
-	}
-	return 0;
-}
-
-// Link shaders
-int HelloCamera::LinkShaders_() {
-	shaderProgram_ = glCreateProgram();
-	glAttachShader(shaderProgram_, vertexShader_);
-	glAttachShader(shaderProgram_, fragmentShader_);
-	glLinkProgram(shaderProgram_);
-	int success = 0;
-	char infoLog[512] = "";
-	glGetProgramiv(shaderProgram_, GL_LINK_STATUS, &success);
-	if (!success) {
-		glGetProgramInfoLog(shaderProgram_, 512, NULL, infoLog);
-		logger_.Error("Failed to link shaders\n");
-	}
-	delete[] vertexShaderSource_;
-	delete[] fragmentShaderSource_;
-	glDeleteShader(vertexShader_);
-	glDeleteShader(fragmentShader_);
+// Set up the shader program
+int HelloCamera::SetUpShader_() {
+	assert(shader_ != nullptr);
+	shader_->AddVertex("src/HelloCameraVertex.glsl");
+	shader_->AddFragment("src/HelloCameraFragment.glsl");
+	shader_->Link();
 	return 0;
 }
 
@@ -275,9 +205,9 @@ int HelloCamera::CreateTexture2_() {
 
 // Bind samplers to texture units
 int HelloCamera::BindSamplerToTexUnit_() {
-	glUseProgram(shaderProgram_);
-	glUniform1i(glGetUniformLocation(shaderProgram_, "sampler1"), 0);
-	glUniform1i(glGetUniformLocation(shaderProgram_, "sampler2"), 1);
+	glUseProgram(shader_->program);
+	glUniform1i(glGetUniformLocation(shader_->program, "sampler1"), 0);
+	glUniform1i(glGetUniformLocation(shader_->program, "sampler2"), 1);
 	return 0;
 }
 
@@ -294,18 +224,18 @@ int HelloCamera::ProcessInput_(GLFWwindow *window) {
 	if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS) {
 		glfwSetWindowShouldClose(window, true);
 	}
-	const float cameraSpeed = 1.0f * deltaFrameTime_;
+	camera_->speed = 1.0f * deltaFrameTime_;
 	if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) {
-		camPos_ += cameraSpeed * camFront_;
+		camera_->MoveForward();
 	}
 	if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) {
-		camPos_ -= cameraSpeed * camFront_;
+		camera_->MoveBackward();
 	}
 	if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) {
-		camPos_ -= glm::normalize(glm::cross(camFront_, camUp_)) * cameraSpeed;
+		camera_->MoveLeft();
 	}
 	if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) {
-		camPos_ += glm::normalize(glm::cross(camFront_, camUp_)) * cameraSpeed;
+		camera_->MoveRight();
 	}
 	
 	return 0;
@@ -314,21 +244,18 @@ int HelloCamera::ProcessInput_(GLFWwindow *window) {
 // Create the model matrix
 int HelloCamera::CreateModelMatrix_() {
 	glm::mat4 model(1.0f);
-	const int modelLoc = glGetUniformLocation(shaderProgram_, "model");
-	glUseProgram(shaderProgram_);
+	const int modelLoc = glGetUniformLocation(shader_->program, "model");
+	glUseProgram(shader_->program);
 	glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
 	return 0;
 }
 
 // Create the view matrix
 int HelloCamera::CreateViewMatrix_() {
-	camFront_.x = cos(glm::radians(pitch_)) * cos(glm::radians(yaw_));
-	camFront_.y = sin(glm::radians(pitch_));
-	camFront_.z = cos(glm::radians(pitch_)) * sin(glm::radians(yaw_));
-	camFront_ = glm::normalize(camFront_);
-	glm::mat4 view = glm::lookAt(camPos_, camPos_ + camFront_, camUp_);
-	const int viewLoc = glGetUniformLocation(shaderProgram_, "view");
-	glUseProgram(shaderProgram_);
+	camera_->CalculateFront(pitch_, yaw_);
+	glm::mat4 view = glm::lookAt(camera_->pos, camera_->pos + camera_->front, camera_->up);
+	const int viewLoc = glGetUniformLocation(shader_->program, "view");
+	glUseProgram(shader_->program);
 	glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
 	return 0;
 }
@@ -337,8 +264,8 @@ int HelloCamera::CreateViewMatrix_() {
 int HelloCamera::CreateProjectionMatrix_() {
 	glm::mat4 projection;
 	projection = glm::perspective(glm::radians(fov_), 1.0f * windowWidth_ / windowHeight_, 0.1f, 100.0f);
-	const int projectionLoc = glGetUniformLocation(shaderProgram_, "projection");
-	glUseProgram(shaderProgram_);
+	const int projectionLoc = glGetUniformLocation(shader_->program, "projection");
+	glUseProgram(shader_->program);
 	glUniformMatrix4fv(projectionLoc, 1, GL_FALSE, glm::value_ptr(projection));
 	return 0;
 }
@@ -354,7 +281,7 @@ int HelloCamera::Render_() {
 	glActiveTexture(GL_TEXTURE1);
 	glBindTexture(GL_TEXTURE_2D, tex2_);
 	// Draw
-	glUseProgram(shaderProgram_);
+	glUseProgram(shader_->program);
 	glBindVertexArray(vao_);  // No need to bind it every time 
 	glDrawArrays(GL_TRIANGLES, 0, 36);
 	glBindVertexArray(0);  // No need to unbind it every time 

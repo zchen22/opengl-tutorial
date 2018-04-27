@@ -1,9 +1,12 @@
 #pragma once
 
+#include <memory>
+
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
 #include "Logger.h"
+#include "Shader.h"
 
 class HelloTexture {
 public:
@@ -13,9 +16,7 @@ public:
 private:
 	// Internal functions
 	int Init_();
-	int CreateVertexShader_();
-	int CreateFragmentShader_();
-	int LinkShaders_();
+	int SetUpShader_();
 	int SetUpVertexData_();
 	int CreateTexture1_();
 	int CreateTexture2_();
@@ -27,11 +28,7 @@ private:
 	// Data
 	Logger logger_;
 	GLFWwindow* window_;
-	char* vertexShaderSource_;
-	char* fragmentShaderSource_;
-	int vertexShader_;
-	int fragmentShader_;
-	int shaderProgram_;
+	std::unique_ptr<Shader> shader_;
 	unsigned int vao_;
 	unsigned int vbo_;
 	unsigned int ebo_;
