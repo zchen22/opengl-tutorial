@@ -3,9 +3,9 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
+#include "stb_image.h"
 
 #include "FileReader.h"
-#include "stb_image.h"
 
 HelloCoordSystems::HelloCoordSystems()
 	: windowWidth_(0),
@@ -71,7 +71,7 @@ int HelloCoordSystems::Init_() {
 	// Enable depth testing
 	glEnable(GL_DEPTH_TEST);
 	// Create an empty shader program
-	shader_ = std::make_unique<Shader>(Shader(logger_));
+	shader_ = std::make_unique<Shader>(logger_);
 	return 0;
 }
 

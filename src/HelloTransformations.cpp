@@ -3,9 +3,9 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
+#include "stb_image.h"
 
 #include "FileReader.h"
-#include "stb_image.h"
 
 HelloTransformations::HelloTransformations()
 	: shader_(nullptr),
@@ -58,7 +58,7 @@ int HelloTransformations::Init_() {
 		exit(EXIT_FAILURE);
 	}
 	// Create an empty shader program
-	shader_ = std::make_unique<Shader>(Shader(logger_));
+	shader_ = std::make_unique<Shader>(logger_);
 	return 0;
 }
 

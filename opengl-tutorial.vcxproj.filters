@@ -54,6 +54,15 @@
     <ClCompile Include="src\Camera.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\HelloLight.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\LightSource.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Cube.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="glad\include\glad\glad.h">
@@ -101,6 +110,15 @@
     <ClInclude Include="inc\Camera.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="inc\HelloLight.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="inc\LightSource.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="inc\Cube.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="src\HelloTextureFragment.glsl">
@@ -131,6 +149,18 @@
       <Filter>Source Files</Filter>
     </None>
     <None Include="src\HelloCameraVertex.glsl">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="src\LightSourceFragment.glsl">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="src\LightSourceVertex.glsl">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="src\CubeFragment.glsl">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="src\CubeVertex.glsl">
       <Filter>Source Files</Filter>
     </None>
   </ItemGroup>

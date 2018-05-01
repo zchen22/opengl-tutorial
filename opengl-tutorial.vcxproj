@@ -119,13 +119,16 @@
   <ItemGroup>
     <ClCompile Include="glad\src\glad.c" />
     <ClCompile Include="src\Camera.cpp" />
+    <ClCompile Include="src\Cube.cpp" />
     <ClCompile Include="src\FileReader.cpp" />
     <ClCompile Include="src\HelloCamera.cpp" />
     <ClCompile Include="src\HelloCoordSystems.cpp" />
+    <ClCompile Include="src\HelloLight.cpp" />
     <ClCompile Include="src\HelloTexture.cpp" />
     <ClCompile Include="src\HelloTransformations.cpp" />
     <ClCompile Include="src\HelloTriangle.cpp" />
     <ClCompile Include="src\HelloWindow.cpp" />
+    <ClCompile Include="src\LightSource.cpp" />
     <ClCompile Include="src\Logger.cpp" />
     <ClCompile Include="src\Main.cpp" />
     <ClCompile Include="src\Shader.cpp" />
@@ -137,18 +140,23 @@
     <ClInclude Include="glfw-3.2.1.bin.win64\include\glfw\glfw3.h" />
     <ClInclude Include="glfw-3.2.1.bin.win64\include\glfw\glfw3native.h" />
     <ClInclude Include="inc\Camera.h" />
+    <ClInclude Include="inc\Cube.h" />
     <ClInclude Include="inc\FileReader.h" />
     <ClInclude Include="inc\HelloCamera.h" />
     <ClInclude Include="inc\HelloCoordSystems.h" />
+    <ClInclude Include="inc\HelloLight.h" />
     <ClInclude Include="inc\HelloTexture.h" />
     <ClInclude Include="inc\HelloTransformations.h" />
     <ClInclude Include="inc\HelloTriangle.h" />
     <ClInclude Include="inc\HelloWindow.h" />
+    <ClInclude Include="inc\LightSource.h" />
     <ClInclude Include="inc\Logger.h" />
     <ClInclude Include="inc\Shader.h" />
     <ClInclude Include="inc\stb_image.h" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="src\CubeFragment.glsl" />
+    <None Include="src\CubeVertex.glsl" />
     <None Include="src\HelloCameraFragment.glsl" />
     <None Include="src\HelloCameraVertex.glsl" />
     <None Include="src\HelloCoordSystemsFragment.glsl" />
@@ -159,6 +167,8 @@
     <None Include="src\HelloTransformationsVertex.glsl" />
     <None Include="src\HelloTriangleFragment.glsl" />
     <None Include="src\HelloTriangleVertex.glsl" />
+    <None Include="src\LightSourceFragment.glsl" />
+    <None Include="src\LightSourceVertex.glsl" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

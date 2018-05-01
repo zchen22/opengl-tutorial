@@ -1,10 +1,11 @@
 #include "HelloCamera.h"
 
+#include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
+#include "stb_image.h"
 
 #include "FileReader.h"
-#include "stb_image.h"
 
 bool HelloCamera::firstFrame_ = true;
 float HelloCamera::lastCursorX_ = 0;
@@ -80,9 +81,9 @@ int HelloCamera::Init_() {
 	glfwSetCursorPosCallback(window_, MouseCallback_);
 	glfwSetScrollCallback(window_, ScrollCallback_);
 	// Create an empty shader program
-	shader_ = std::make_unique<Shader>(Shader(logger_));
+	shader_ = std::make_unique<Shader>(logger_);
 	// Create a camera
-	camera_ = std::make_unique<Camera>(Camera(logger_));
+	camera_ = std::make_unique<Camera>(logger_);
 	return 0;
 }
 

@@ -2,8 +2,9 @@
 
 #include <cassert>
 
-#include "FileReader.h"
 #include "stb_image.h"
+
+#include "FileReader.h"
 
 HelloTexture::HelloTexture()
 	: shader_(nullptr),
@@ -55,7 +56,7 @@ int HelloTexture::Init_() {
 		exit(EXIT_FAILURE);
 	}
 	// Create an empty shader program
-	shader_ = std::make_unique<Shader>(Shader(logger_));
+	shader_ = std::make_unique<Shader>(logger_);
 	return 0;
 }
 
