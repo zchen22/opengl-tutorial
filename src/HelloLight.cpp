@@ -132,11 +132,11 @@ int HelloLight::UpdateMVPMatrices_() {
 	deltaFrameTime_ = currentFrameTime - lastFrameTime_;
 	lastFrameTime_ = currentFrameTime;
 	// Update the model matrix
-	cube_->SetUpModelMatrix();
 	glm::mat4 model(1.0f);
 	model = glm::translate(model, glm::vec3(1.2f, 1.0f, 2.0f));
 	model = glm::scale(model, glm::vec3(0.2f));
 	lightSource_->SetUpModelMatrix(model);
+	cube_->SetUpModelMatrix(glm::mat4(1.0f), model);
 	// Update the view matrix
 	camera_->CalculateFront(pitch_, yaw_);
 	const glm::mat4 view = glm::lookAt(camera_->pos, camera_->pos + camera_->front, camera_->up);

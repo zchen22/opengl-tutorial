@@ -17,7 +17,7 @@ public:
 	int SetUpVertices();
 	int SetUpTextures();
 	int SetUpColor(const GLfloat* color, const GLfloat* lightColor);
-	int SetUpModelMatrix(const glm::mat4& model = glm::mat4(1.0f));
+	int SetUpModelMatrix(const glm::mat4& model = glm::mat4(1.0f), const glm::mat4& lightModel = glm::mat4(1.0f));
 	int SetUpViewMatrix(const glm::mat4& view);
 	int SetUpProjectionMatrix(const glm::mat4& projection);
 	// Data
