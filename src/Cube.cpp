@@ -69,6 +69,7 @@ int Cube::SetUpVertices() {
 		-0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f, 0.0f, 0.0f,
 		-0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f, 0.0f, 1.0f
 	};
+	numVertices = 36;
 	glGenVertexArrays(1, &vao);
 	glGenBuffers(1, &vbo_);
 	glBindVertexArray(vao);
@@ -125,10 +126,23 @@ int Cube::SetUpTextures() {
 	return 0;
 }
 
-int Cube::SetUpColor(const GLfloat* color, const GLfloat* lightColor) {
+int Cube::SetUpLight(const LightSource& lightSource) {
+	glUseProgram(shader->program);
+	glUniform3fv(glGetUniformLocation(shader->program, "lightPos"), 1, glm::value_ptr(lightSource.position));
+	glUniform3fv(glGetUniformLocation(shader->program, "lightColor"), 1, glm::value_ptr(lightSource.color));
+	return 0;
+}
+
+int Cube::SetUpCamera(const Camera& camera) {
+	glUseProgram(shader->program);
+	glUniform3fv(glGetUniformLocation(shader->program, "viewPos"), 1, glm::value_ptr(camera.pos));
+	return 0;
+}
+
+int Cube::SetUpColor(const float r, const float g, const float b) {
+	const GLfloat color[] = { r, g, b };
 	glUseProgram(shader->program);
 	glUniform3fv(glGetUniformLocation(shader->program, "objectColor"), 1, color);
-	glUniform3fv(glGetUniformLocation(shader->program, "lightColor"), 1, lightColor);
 	return 0;
 }
 
@@ -136,6 +150,9 @@ int Cube::SetUpModelMatrix(const glm::mat4& model, const glm::mat4& lightModel) 
 	int loc = glGetUniformLocation(shader->program, "model");
 	glUseProgram(shader->program);
 	glUniformMatrix4fv(loc, 1, GL_FALSE, glm::value_ptr(model));
+	loc = glGetUniformLocation(shader->program, "modelInv");
+	glUseProgram(shader->program);
+	glUniformMatrix4fv(loc, 1, GL_FALSE, glm::value_ptr(glm::inverse(model)));
 	loc = glGetUniformLocation(shader->program, "lightModel");
 	glUseProgram(shader->program);
 	glUniformMatrix4fv(loc, 1, GL_FALSE, glm::value_ptr(lightModel));

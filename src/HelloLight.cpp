@@ -33,8 +33,8 @@ HelloLight::~HelloLight() {
 
 int HelloLight::Main() {
 	Init_();
-	SetUpScene_();
 	SetUpCamera_();
+	SetUpScene_();
 	// Render loop
 	while (!glfwWindowShouldClose(window_)) {
 		ProcessInput_(window_);
@@ -77,29 +77,30 @@ int HelloLight::Init_() {
 	return 0;
 }
 
+// Set up the camera
+int HelloLight::SetUpCamera_() {
+	camera_ = std::make_unique<Camera>(logger_);
+	logger_.Debug("Camera set up.\n");
+	return 0;
+}
+
 // Set up the scene
 int HelloLight::SetUpScene_() {
 	// Create a light source
 	lightSource_ = std::make_unique<LightSource>(logger_);
 	lightSource_->SetUpShader("src/LightSourceVertex.glsl", "src/LightSourceFragment.glsl");
 	lightSource_->SetUpVertices();
-	const GLfloat lightColor[] = { 1.0f, 1.0f, 1.0f };
-	lightSource_->SetUpColor(lightColor);
+	lightSource_->SetUpColor(1.0f, 1.0f, 1.0f);
+	lightSource_->SetUpPosition(1.0f, 1.0f, 2.0f);
 	// Create a cube
 	cube_ = std::make_unique<Cube>(logger_);
 	cube_->SetUpShader("src/CubeVertex.glsl", "src/CubeFragment.glsl");
 	cube_->SetUpVertices();
-	const GLfloat cubeColor[] = { 1.0f, 0.5f, 0.31f };
-	cube_->SetUpColor(cubeColor, lightColor);
+	cube_->SetUpLight(*lightSource_);
+	cube_->SetUpCamera(*camera_);
+	cube_->SetUpColor(1.0f, 0.5f, 0.31f);
 	cube_->SetUpTextures();
 	logger_.Debug("Scene set up.\n");
-	return 0;
-}
-
-// Set up the camera
-int HelloLight::SetUpCamera_() {
-	camera_ = std::make_unique<Camera>(logger_);
-	logger_.Debug("Camera set up.\n");
 	return 0;
 }
 
@@ -121,7 +122,6 @@ int HelloLight::ProcessInput_(GLFWwindow *window) {
 	if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) {
 		camera_->MoveRight();
 	}
-	
 	return 0;
 }
 
@@ -162,12 +162,10 @@ int HelloLight::Render_() {
 	// Draw
 	glUseProgram(lightSource_->shader->program);
 	glBindVertexArray(lightSource_->vao);  // No need to bind it every time
-	glDrawArrays(GL_TRIANGLES, 0, 36);
-	glBindVertexArray(0);  // No need to unbind it every time
+	glDrawArrays(GL_TRIANGLES, 0, lightSource_->numVertices);
 	glUseProgram(cube_->shader->program);
 	glBindVertexArray(cube_->vao);  // No need to bind it every time
-	glDrawArrays(GL_TRIANGLES, 0, 36);
-	glBindVertexArray(0);  // No need to unbind it every time
+	glDrawArrays(GL_TRIANGLES, 0, cube_->numVertices);
 	return 0;
 }
 

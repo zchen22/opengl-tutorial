@@ -22,21 +22,20 @@ int LightSource::SetUpShader(const char* vertexSourcePath, const char* fragmentS
 	return 0;
 }
 
-// Set up vertices
 int LightSource::SetUpVertices() {
 	// Cube
 	float vertices[] = {
 		-0.5f, -0.5f, -0.5f,
-		0.5f, -0.5f, -0.5f,
-		0.5f,  0.5f, -0.5f,
-		0.5f,  0.5f, -0.5f,
+		 0.5f, -0.5f, -0.5f,
+		 0.5f,  0.5f, -0.5f,
+		 0.5f,  0.5f, -0.5f,
 		-0.5f,  0.5f, -0.5f,
 		-0.5f, -0.5f, -0.5f,
 
 		-0.5f, -0.5f,  0.5f,
-		0.5f, -0.5f,  0.5f,
-		0.5f,  0.5f,  0.5f,
-		0.5f,  0.5f,  0.5f,
+		 0.5f, -0.5f,  0.5f,
+		 0.5f,  0.5f,  0.5f,
+		 0.5f,  0.5f,  0.5f,
 		-0.5f,  0.5f,  0.5f,
 		-0.5f, -0.5f,  0.5f,
 
@@ -47,27 +46,28 @@ int LightSource::SetUpVertices() {
 		-0.5f, -0.5f,  0.5f,
 		-0.5f,  0.5f,  0.5f,
 
-		0.5f,  0.5f,  0.5f,
-		0.5f,  0.5f, -0.5f,
-		0.5f, -0.5f, -0.5f,
-		0.5f, -0.5f, -0.5f,
-		0.5f, -0.5f,  0.5f,
-		0.5f,  0.5f,  0.5f,
+		 0.5f,  0.5f,  0.5f,
+		 0.5f,  0.5f, -0.5f,
+		 0.5f, -0.5f, -0.5f,
+		 0.5f, -0.5f, -0.5f,
+		 0.5f, -0.5f,  0.5f,
+		 0.5f,  0.5f,  0.5f,
 
 		-0.5f, -0.5f, -0.5f,
-		0.5f, -0.5f, -0.5f,
-		0.5f, -0.5f,  0.5f,
-		0.5f, -0.5f,  0.5f,
+		 0.5f, -0.5f, -0.5f,
+		 0.5f, -0.5f,  0.5f,
+		 0.5f, -0.5f,  0.5f,
 		-0.5f, -0.5f,  0.5f,
 		-0.5f, -0.5f, -0.5f,
 
 		-0.5f,  0.5f, -0.5f,
-		0.5f,  0.5f, -0.5f,
-		0.5f,  0.5f,  0.5f,
-		0.5f,  0.5f,  0.5f,
+		 0.5f,  0.5f, -0.5f,
+		 0.5f,  0.5f,  0.5f,
+		 0.5f,  0.5f,  0.5f,
 		-0.5f,  0.5f,  0.5f,
 		-0.5f,  0.5f, -0.5f,
 	};
+	numVertices = 36;
 	glGenVertexArrays(1, &vao);
 	glGenBuffers(1, &vbo_);
 	glBindVertexArray(vao);
@@ -80,9 +80,15 @@ int LightSource::SetUpVertices() {
 	return 0;
 }
 
-int LightSource::SetUpColor(const GLfloat* color) {
+int LightSource::SetUpColor(const float r, const float g, const float b) {
+	color = glm::vec3(r, g, b);
 	glUseProgram(shader->program);
-	glUniform3fv(glGetUniformLocation(shader->program, "color"), 1, color);
+	glUniform3fv(glGetUniformLocation(shader->program, "color"), 1, glm::value_ptr(color));
+	return 0;
+}
+
+int LightSource::SetUpPosition(const float x, const float y, const float z) {
+	position = glm::vec3(x, y, z);
 	return 0;
 }
 

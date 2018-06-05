@@ -19,8 +19,8 @@ public:
 private:
 	// Methods
 	int Init_();
-	int SetUpScene_();
 	int SetUpCamera_();
+	int SetUpScene_();
 	int ProcessInput_(GLFWwindow *window);
 	int UpdateMVPMatrices_();
 	int Render_();
